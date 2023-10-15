@@ -1,29 +1,52 @@
-const display = document.querySelector(".display");
-const buttons = document.querySelectorAll("button");
-const specialChars = ["%", "*", "/", "-", "+", "="];
-let output = "";
+// Get the display element and buttons
+const display = document.querySelector('.display');
+const buttons = document.querySelectorAll('button');
 
-//Define function to calculate based on button clicked.
-const calculate = (btnValue) => {
-  display.focus();
-  if (btnValue === "=" && output !== "") {
-    //If output has '%', replace with '/100' before evaluating.
-    output = eval(output.replace("%", "/100"));
-  } else if (btnValue === "AC") {
-    output = "";
-  } else if (btnValue === "DEL") {
-    //If DEL button is clicked, remove the last character from the output.
-    output = output.toString().slice(0, -1);
-  } else {
-    //If output is empty and button is specialChars then return
-    if (output === "" && specialChars.includes(btnValue)) return;
-    output += btnValue;
-  }
-  display.value = output;
-};
-
-//Add event listener to buttons, call calculate() on click.
-buttons.forEach((button) => {
-  //Button click listener calls calculate() with dataset value as argument.
-  button.addEventListener("click", (e) => calculate(e.target.dataset.value));
+// Add a click event listener to each button
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    const buttonValue = button.getAttribute('data-value');
+    
+    if (buttonValue === 'AC') {
+      // Clear the display
+      display.value = '';
+    } else if (buttonValue === 'DEL') {
+      // Delete the last character
+      display.value = display.value.slice(0, -1);
+    } else if (buttonValue === '=') {
+      // Evaluate the expression and display the result
+      let expression = display.value;
+      let result;
+      
+      // Replace x^ with Math.pow()
+      expression = expression.replace(/x\^/g, 'Math.pow(');
+      
+      try {
+        // Evaluate the expression with special functions
+        result = eval(expression);
+        
+        // Check if the result includes any trigonometric functions or logarithms
+        if (expression.includes('sin')) {
+          result = Math.sin(result);
+        } else if (expression.includes('cos')) {
+          result = Math.cos(result);
+        } else if (expression.includes('tan')) {
+          result = Math.tan(result);
+        } else if (expression.includes('ln')) {
+          result = Math.log(result);
+        } else if (expression.includes('log')) {
+          result = Math.log10(result);
+        } else if (expression.includes('√')) {
+          result = Math.sqrt(result);
+        }
+        
+        display.value = result;
+      } catch (error) {
+        display.value = 'Error';
+      }
+    } else {
+      // Append the button value to the display
+      display.value += buttonValue;
+    }
+  });
 });
